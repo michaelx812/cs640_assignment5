@@ -174,7 +174,7 @@ class SWPReceiver:
             found = 0
             self.buffer.append(packet)
             for i in range(1, len(self.buffer)+1):
-                for j in range(0, len(self.buffer)-1):
+                for j in range(0, len(self.buffer)):
                     if self.buffer[j].seq_num == self.ack+1:
                         self._ready_data.push(self.buffer.pop(j))
                         self.ack = self.ack + 1
