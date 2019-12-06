@@ -146,7 +146,8 @@ class SWPReceiver:
         self._recv_thread.start()
         
         # TODO: Add additional state variables
-        self.buffer = {}
+        self.buffer = []
+        self.ack = 0
 
     def recv(self):
         return self._ready_data.get()
@@ -159,5 +160,32 @@ class SWPReceiver:
             logging.debug("Received: %s" % packet)
             
             # TODO
-
+            if not packet.type is SWPType.Data:
+                continue
+            
+            if not packet.seq_num > self.ack:
+                pkt = SWPPacket(SWPType.ACK,packet.seq_num)
+                self._llp_endpoint.send(pkt.to_bytes())
+                continue
+            
+            if len(self._ready_data)+len(self.buffer) >= self._RECV_WINDOW_SIZE:
+                continue
+            
+            found = 0
+            self.buffer.append[packet]
+            for i in range(1, len(self.buffer)+1):
+                for j in range(0, len(self.buffer)-1):
+                    if self.buffer[j].seq_num == self.ack+1:
+                        self._ready_data.push(self.buffer.pop(j))
+                        self.ack = self.ack + 1
+                        found = 1
+                        continue
+                    break
+                if found == 0:
+                    break
+            
+            pkt = SWPPacket(SWPType.ACK,self.ack)
+            self._llp_endpoint.send(pkt.to_bytes())
+                
+            
         return
