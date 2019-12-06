@@ -124,6 +124,7 @@ class SWPSender:
                 continue
             
             seq_num = packet.seq_num
+            logging.debug("received seq num = %d",i)
             (self.Timers[seq_num]).cancel()
             for i in range(self.LAST_ACK+1,seq_num): 
                 logging.debug("%d",i)
