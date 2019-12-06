@@ -176,7 +176,7 @@ class SWPReceiver:
             for i in range(1, len(self.buffer)+1):
                 for j in range(0, len(self.buffer)):
                     if self.buffer[j].seq_num == self.ack+1:
-                        self._ready_data.put(self.buffer.pop(j))
+                        self._ready_data.put(self.buffer.pop(j).data)
                         self.ack = self.ack + 1
                         found = 1
                         break
