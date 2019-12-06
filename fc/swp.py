@@ -99,7 +99,7 @@ class SWPSender:
     def _retransmit(self, seq_num):
         
         renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit,[seq_num])
-        self.Timers.update({seq_num : renewed_timer})
+        self.Timers.update({seq_num:renewed_timer})
         renewed_timer.start()
         
         #send pkt
@@ -132,7 +132,7 @@ class SWPSender:
         return
 
 class SWPReceiver:
-    _RECV_WINDOW_SIZE = 5
+    _RECV_WINDOW_SIZE = 1
 
     def __init__(self, local_address, loss_probability=0):
         self._llp_endpoint = llp.LLPEndpoint(local_address=local_address, 
