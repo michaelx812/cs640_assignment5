@@ -128,6 +128,7 @@ class SWPSender:
                 del self.Buffer[i]
                 self.Timers[i].cancel()
                 del self.Timers[i]
+                logging.debug("release lock")
                 self.sem.release()
             self.LAST_ACK = seq_num
         return
