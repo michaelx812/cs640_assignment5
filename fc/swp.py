@@ -99,7 +99,7 @@ class SWPSender:
     def _retransmit(self, seq_num):
         
         renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit,[seq_num])
-        self.Timers.update({seq_num,renewed_timer})
+        self.Timers.update({seq_num : renewed_timer})
         renewed_timer.start()
         
         #send pkt
@@ -169,7 +169,14 @@ class SWPReceiver:
                 continue
             
             if self._ready_data.qsize()+len(self.buffer) >= self._RECV_WINDOW_SIZE:
-                continue
+                self.buffer.append(packet)
+                maxN = 0
+                maxIndex = -1
+                for i in range(0, len(self.buffer)):
+                    if self.buffer[i].seq_num > maxN:
+                        maxN = self.buffer[i].seq_num
+                        maxIndex = i
+                self.buffer.pop(maxIndex)
             
             found = 0
             self.buffer.append(packet)
