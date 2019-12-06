@@ -63,6 +63,7 @@ class SWPSender:
         
         # TODO: Add additional state variables
         self.Buffer = {}
+        self.Timers = {}
         self.LAST_ACK = 0
         self.LAST_SENT = 0
         self.sem = threading.Semaphore(self._SEND_WINDOW_SIZE)
@@ -82,9 +83,9 @@ class SWPSender:
         
         #add to buffer
         
-        self.Buffer[SEQ] = [data]
+        self.Buffer[SEQ] = data
         timer = threading.Timer(self._TIMEOUT,self._retransmit(SEQ))
-        self.Buffer[SEQ].append(timer)
+        self.Timers[SEQ] = timer
         
         #send pkt
         pkt = SWPPacket(SWPType.DATA,SEQ,data)
@@ -98,11 +99,11 @@ class SWPSender:
     def _retransmit(self, seq_num):
         
         #send pkt
-        data = self.Buffer[seq_num][0]
+        data = self.Buffer[seq_num]
         pkt = SWPPacket(SWPType.DATA,seq_num,data)
         self._llp_endpoint.send(pkt.to_bytes())
         renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit(seq_num))
-        self.Buffer[seq_num][1] = renewed_timer
+        self.Timers[seq_num] = renewed_timer
         renewed_timer.start()
         return 
 
@@ -119,7 +120,7 @@ class SWPSender:
                 continue
             
             seq_num = packet.seq_num
-            (self.Buffer[seq_num][1]).cancel()
+            self.Timers[seq_num].cancel()
             for i in range(self.LAST_ACK+1,seq_num):
                 self.sem.release()
                 del self.Buffer[seq_num]
