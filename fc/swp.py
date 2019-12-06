@@ -77,6 +77,7 @@ class SWPSender:
     def _send(self, data):
         #wait for free space
         self.sem.acquire()     
+        logging.debug("lock acquire")
         
         #ger seq#
         SEQ = self.LAST_SENT+1
