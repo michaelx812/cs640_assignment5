@@ -52,6 +52,7 @@ class SWPSender:
     _SEND_WINDOW_SIZE = 5
     _TIMEOUT = 1
 
+
     def __init__(self, remote_address, loss_probability=0):
         self._llp_endpoint = llp.LLPEndpoint(remote_address=remote_address,
                 loss_probability=loss_probability)
@@ -59,8 +60,13 @@ class SWPSender:
         # Start receive thread
         self._recv_thread = threading.Thread(target=self._recv)
         self._recv_thread.start()
-
+        
         # TODO: Add additional state variables
+        self.Buffer = {}
+        self.LAST_ACK = 0
+        self.LAST_SENT = 0
+        self.sem = threading.Semaphore(_SEND_WINDOW_SIZE)
+
 
 
     def send(self, data):
@@ -68,13 +74,33 @@ class SWPSender:
             self._send(data[i:i+SWPPacket.MAX_DATA_SIZE])
 
     def _send(self, data):
-        # TODO
-
+        #wait for free space
+        self.sem.acquire()     
+        
+        #ger seq#
+        SEQ = LAST_SENT+1
+        
+        #add to buffer
+        timer = threading.Timer(_TIMEOUT,_retransmit(self,SEQ))
+        Buffer[SEQ] = {data,timer}
+        
+        #send pkt
+        pkt = SWPPacket(SWPType.DATA,SEQ,data)
+        _llp_endpoint.send(pkt.to_bytes())
+        
+        #start timer for retransmit
+        timer.start()
+        
         return
         
     def _retransmit(self, seq_num):
-        # TODO
-
+        renewed_timer = threading.Timer(_TIMEOUT,_retransmit(self,seq_num))
+        data = Buffer[seq_num][0]
+        Buffer[seq_num][1] = renewed_timer
+        #send pkt
+        pkt = SWPPacket(SWPType.DATA,seq_num,data)
+        _llp_endpoint.send(pkt.to_bytes())
+        renewed_timer.start()
         return 
 
     def _recv(self):
@@ -86,8 +112,15 @@ class SWPSender:
             packet = SWPPacket.from_bytes(raw)
             logging.debug("Received: %s" % packet)
 
-            # TODO
-
+            if not packet.type() is SWPType.ACK:
+                continue
+            
+            seq_num = packet.seq_num()
+            Buffer[seq_num][1].cancel()
+            for i in range(self.LAST_ACK+1,seq_num):
+                self.sem.release()
+                del Buffer[seq_num]
+            self.LAST_ACK = seq_num
         return
 
 class SWPReceiver:
