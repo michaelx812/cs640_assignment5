@@ -160,7 +160,7 @@ class SWPReceiver:
             logging.debug("Received: %s" % packet)
             
             # TODO
-            if not packet.type is SWPType.Data:
+            if not packet.type is SWPType.DATA:
                 continue
             
             if not packet.seq_num > self.ack:
