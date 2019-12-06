@@ -65,7 +65,7 @@ class SWPSender:
         self.Buffer = {}
         self.LAST_ACK = 0
         self.LAST_SENT = 0
-        self.sem = threading.Semaphore(_SEND_WINDOW_SIZE)
+        self.sem = threading.Semaphore(self._SEND_WINDOW_SIZE)
 
 
 
@@ -78,15 +78,15 @@ class SWPSender:
         self.sem.acquire()     
         
         #ger seq#
-        SEQ = LAST_SENT+1
+        SEQ = self.LAST_SENT+1
         
         #add to buffer
-        timer = threading.Timer(_TIMEOUT,_retransmit(self,SEQ))
-        Buffer[SEQ] = {data,timer}
+        timer = threading.Timer(self._TIMEOUT,_retransmit(self,SEQ))
+        self.Buffer[SEQ] = {data,timer}
         
         #send pkt
         pkt = SWPPacket(SWPType.DATA,SEQ,data)
-        _llp_endpoint.send(pkt.to_bytes())
+        self._llp_endpoint.send(pkt.to_bytes())
         
         #start timer for retransmit
         timer.start()
@@ -94,12 +94,12 @@ class SWPSender:
         return
         
     def _retransmit(self, seq_num):
-        renewed_timer = threading.Timer(_TIMEOUT,_retransmit(self,seq_num))
-        data = Buffer[seq_num][0]
-        Buffer[seq_num][1] = renewed_timer
+        renewed_timer = threading.Timer(self._TIMEOUT,_retransmit(self,seq_num))
+        data = self.Buffer[seq_num][0]
+        self.Buffer[seq_num][1] = renewed_timer
         #send pkt
         pkt = SWPPacket(SWPType.DATA,seq_num,data)
-        _llp_endpoint.send(pkt.to_bytes())
+        self._llp_endpoint.send(pkt.to_bytes())
         renewed_timer.start()
         return 
 
@@ -138,7 +138,7 @@ class SWPReceiver:
         self._recv_thread.start()
         
         # TODO: Add additional state variables
-
+        self.buffer = {}
 
     def recv(self):
         return self._ready_data.get()
