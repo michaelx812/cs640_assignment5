@@ -94,12 +94,13 @@ class SWPSender:
         return
         
     def _retransmit(self, seq_num):
-        renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit(seq_num))
-        data = self.Buffer[seq_num][0]
-        self.Buffer[seq_num][1] = renewed_timer
+        
         #send pkt
+        data = self.Buffer[seq_num][0]
         pkt = SWPPacket(SWPType.DATA,seq_num,data)
         self._llp_endpoint.send(pkt.to_bytes())
+        renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit(seq_num))
+        self.Buffer[seq_num][1] = renewed_timer
         renewed_timer.start()
         return 
 
