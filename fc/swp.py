@@ -115,7 +115,7 @@ class SWPSender:
             packet = SWPPacket.from_bytes(raw)
             logging.debug("Received: %s" % packet)
 
-
+            logging.debug(SWPType.ACK)
             if not packet.type() == SWPType.ACK:
                 logging.debug("!!!!!")
                 continue
