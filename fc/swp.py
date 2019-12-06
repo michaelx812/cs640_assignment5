@@ -179,8 +179,7 @@ class SWPReceiver:
                         self._ready_data.push(self.buffer.pop(j))
                         self.ack = self.ack + 1
                         found = 1
-                        continue
-                    break
+                        break
                 if found == 0:
                     break
             
