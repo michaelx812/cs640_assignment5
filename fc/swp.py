@@ -84,7 +84,7 @@ class SWPSender:
         #add to buffer
         
         self.Buffer.update({SEQ:data})
-        timer = threading.Timer(self._TIMEOUT,self._retransmit(SEQ))
+        timer = threading.Timer(self._TIMEOUT,self._retransmit,[SEQ])
         timer.start()
         self.Timers.update({SEQ:timer})
         
@@ -98,7 +98,7 @@ class SWPSender:
         
     def _retransmit(self, seq_num):
         
-        renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit(seq_num))
+        renewed_timer = threading.Timer(self._TIMEOUT,self._retransmit,[seq_num])
         self.Timers.update({seq_num,renewed_timer})
         renewed_timer.start()
         
@@ -124,9 +124,10 @@ class SWPSender:
             seq_num = packet.seq_num
             (self.Timers[seq_num]).cancel()
             for i in range(self.LAST_ACK+1,seq_num):
-                self.sem.release()
+                
                 del self.Buffer[seq_num]
                 del self.Timer[seq_num]
+                self.sem.release()
             self.LAST_ACK = seq_num
         return
 
