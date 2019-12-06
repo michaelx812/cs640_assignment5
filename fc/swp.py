@@ -80,6 +80,7 @@ class SWPSender:
         
         #ger seq#
         SEQ = self.LAST_SENT+1
+        self.LAST_SENT+=1
         
         #add to buffer
         
