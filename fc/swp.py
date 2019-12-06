@@ -164,12 +164,23 @@ class SWPReceiver:
                 continue
             
             if not packet.seq_num > self.ack:
-                pkt = SWPPacket(SWPType.ACK,packet.seq_num)
+                pkt = SWPPacket(SWPType.ACK,self.ack)
                 self._llp_endpoint.send(pkt.to_bytes())
                 continue
             
-            if self._ready_data.qsize()+len(self.buffer) >= self._RECV_WINDOW_SIZE:
-                self.buffer.append(packet)
+            repeat = 0
+            for i in range(0, len(self.buffer)):
+                if(packet.seq_num == buffer[i].seq_num):
+                    repeat = 1
+                    break
+                    
+            if repeat == 1:
+                pkt = SWPPacket(SWPType.ACK,self.ack)
+                self._llp_endpoint.send(pkt.to_bytes())
+                continue
+            
+            self.buffer.append(packet)
+            if self._ready_data.qsize()+len(self.buffer) > self._RECV_WINDOW_SIZE:
                 maxN = 0
                 maxIndex = -1
                 for i in range(0, len(self.buffer)):
@@ -179,8 +190,8 @@ class SWPReceiver:
                 self.buffer.pop(maxIndex)
             
             found = 0
-            self.buffer.append(packet)
-            for i in range(1, len(self.buffer)+1):
+            
+            for i in range(0, len(self.buffer)):
                 for j in range(0, len(self.buffer)):
                     if self.buffer[j].seq_num == self.ack+1:
                         self._ready_data.put(self.buffer.pop(j).data)
