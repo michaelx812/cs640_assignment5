@@ -168,7 +168,7 @@ class SWPReceiver:
                 self._llp_endpoint.send(pkt.to_bytes())
                 continue
             
-            if len(self._ready_data)+len(self.buffer) >= self._RECV_WINDOW_SIZE:
+            if self._ready_data.qsize()+len(self.buffer) >= self._RECV_WINDOW_SIZE:
                 continue
             
             found = 0
