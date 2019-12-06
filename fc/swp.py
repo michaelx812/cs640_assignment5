@@ -171,7 +171,7 @@ class SWPReceiver:
             
             repeat = 0
             for i in range(0, len(self.buffer)):
-                if(packet.seq_num == buffer[i].seq_num):
+                if(packet.seq_num == self.buffer[i].seq_num):
                     repeat = 1
                     break
                     
