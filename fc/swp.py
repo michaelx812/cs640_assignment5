@@ -84,7 +84,7 @@ class SWPSender:
         #add to buffer
         
         self.Buffer.update({SEQ:data})
-        timer = threading.Timer(self._TIMEOUT)
+        timer = threading.Timer(self._TIMEOUT,self._retransmit(SEQ))
         self.Timers.update({SEQ:timer})
         
         #send pkt
