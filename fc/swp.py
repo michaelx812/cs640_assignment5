@@ -127,7 +127,7 @@ class SWPSender:
             for i in range(self.LAST_ACK+1,seq_num):
                 
                 del self.Buffer[seq_num]
-                del self.Timer[seq_num]
+                del self.Timers[seq_num]
                 self.sem.release()
             self.LAST_ACK = seq_num
         return
