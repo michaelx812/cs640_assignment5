@@ -82,9 +82,9 @@ class SWPSender:
         
         #add to buffer
         
-        self.Buffer[SEQ] = {data}
+        self.Buffer[SEQ] = [data,None]
         timer = threading.Timer(self._TIMEOUT,self._retransmit(SEQ))
-        self.Buffer[SEQ].append(timer)
+        self.Buffer[SEQ][1] = timer
         
         #send pkt
         pkt = SWPPacket(SWPType.DATA,SEQ,data)
