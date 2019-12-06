@@ -120,10 +120,11 @@ class SWPSender:
                 continue
             
             seq_num = packet.seq_num
-            self.Timers[seq_num].cancel()
+            (self.Timers[seq_num]).cancel()
             for i in range(self.LAST_ACK+1,seq_num):
                 self.sem.release()
                 del self.Buffer[seq_num]
+                del self.Timer[seq_num]
             self.LAST_ACK = seq_num
         return
 
