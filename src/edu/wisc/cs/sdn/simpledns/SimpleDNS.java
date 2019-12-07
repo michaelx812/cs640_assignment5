@@ -14,8 +14,6 @@ import java.util.concurrent.RecursiveAction;
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
 import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdata;
-import edu.wisc.cs.sdn.simpledns.packet.DNSRdataAddress;
-import edu.wisc.cs.sdn.simpledns.packet.DNSRdataName;
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
@@ -165,13 +163,14 @@ public class SimpleDNS
 		List<DNSResourceRecord> additions = dns.getAdditional();
 		for(DNSResourceRecord auth_entry: auths){
 			for(DNSResourceRecord add_entry: additions){
-				String auth_string = ((DNSRdataName)auth_entry.getData()).getName();
+				String auth_string = auth_entry.getData().toString();
 				System.out.println("processing auth:"+auth_string+"     addtional:"+add_entry.getName());
+				String add_string = add_entry.getData().toString();
 				if(auth_entry.getType()==DNS.TYPE_NS && 
 				//||add_entry.getType()==DNS.TYPE_AAAA
 					(add_entry.getType()==DNS.TYPE_A ) && 
 					auth_string.equals(add_entry.getName())){
-						InetAddress nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
+						InetAddress nxt_server = InetAddress.getByName(add_string);
 						System.out.println("nxt server:"+auth_string+" : "+nxt_server);
 						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server,ttl-1);
 						if(nxt_pkt!=null){
