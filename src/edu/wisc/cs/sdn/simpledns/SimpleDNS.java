@@ -158,6 +158,7 @@ public class SimpleDNS
 		DatagramPacket in_pkt = handle_non_recur(packet, server_ip);
 		DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
 		//System.out.println(dns.toString());
+		System.out.println(dns.toString());
 		if(contains_A_record(in_pkt)){
 			return in_pkt;
 		}
