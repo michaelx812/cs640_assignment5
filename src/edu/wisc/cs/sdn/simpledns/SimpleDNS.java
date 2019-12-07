@@ -84,8 +84,10 @@ public class SimpleDNS
 					System.out.println("Get receive_pkt==null; should never happen!!!!!");
 					System.exit(1);
 				}
+				if(q_type == DNS.TYPE_A){
+					receive_pkt = addCSVRecord(receive_pkt);
+				}
 				
-
 				//DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
 				receive_pkt.setPort(packet.getPort());
 				receive_pkt.setAddress(packet.getAddress());
@@ -208,6 +210,9 @@ public class SimpleDNS
 	private static DatagramPacket addCSVRecord(DatagramPacket packet) throws Exception{
 		DNS dns = DNS.deserialize(packet.getData(), packet.getLength());
 		List<DNSResourceRecord> answers = dns.getAnswers();
+		if(answers.size() == 0){
+			return packet;
+		}
 		for(DNSResourceRecord record : answers){
 			if(record.getType() == DNS.TYPE_A){
 				InetAddress ip = InetAddress.getByName(record.getData().toString());
