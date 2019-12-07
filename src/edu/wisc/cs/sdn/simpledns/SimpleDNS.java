@@ -181,16 +181,33 @@ public class SimpleDNS
 			
 			String auth_name = ((DNSRdataName)auth_entry.getData()).toString();
 			System.out.println("processing auth:"+auth_name);
-
+			boolean matches = false;
+			InetAddress nxt_server = null;
+			
 			for(DNSResourceRecord add_entry: additions){
 				if(add_entry.getType()!=DNS.TYPE_A)
 					continue;
 				
 				String add_name = add_entry.getName();
 				if(auth_name.equals(add_name)){
-						InetAddress nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
-						System.out.println("nxt server:"+auth_name+" : "+nxt_server);
-						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
+						matches = true;
+						nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
+						break;		
+				}
+			}
+			if(!matches){
+				continue;
+				DatagramPacket recur_on_auth = recur_helper(packet, root_server_ip);
+				if(contains_A_record(recur_on_auth)){
+					for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
+						if(temp_record.getType() == DNS.TYPE_A){
+							nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
+							break;
+						}
+					}
+				}
+			}
+			DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
 						if(contains_A_record(nxt_pkt)){
 							found = true;
 							System.out.println("find confirm");
@@ -205,8 +222,7 @@ public class SimpleDNS
 							}
 						}
 						return_pkt = nxt_pkt;
-				}
-			}
+
 		}
 		if(found){
 			DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
@@ -217,7 +233,8 @@ public class SimpleDNS
 			byte[] buf = result_dns.serialize();
 			return_pkt = new DatagramPacket(buf,buf.length);
 		}
-
+		if(return_pkt == null)
+			return in_pkt;
 		return return_pkt;
 	}
 
