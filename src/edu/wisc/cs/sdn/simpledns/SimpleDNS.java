@@ -171,6 +171,7 @@ public class SimpleDNS
 		DatagramPacket return_pkt = null;
 		boolean found = false;
 		CopyOnWriteArrayList<DNSResourceRecord> cname_records = new CopyOnWriteArrayList<DNSResourceRecord>();
+		CopyOnWriteArrayList<DNSResourceRecord> cname_A_records = new CopyOnWriteArrayList<DNSResourceRecord>();
 		for(DNSResourceRecord auth_entry: auths){
 			if(found == true)
 				break;
@@ -234,30 +235,40 @@ public class SimpleDNS
 			// 		}
 			// 	}
 			// }
-			if(!found && !cname_records.isEmpty()){
-				for(DNSResourceRecord temp_r: cname_records){
-					String Cname = ((DNSRdataName)temp_r.getData()).getName();
-					System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
-					DatagramPacket p = construct_query(packet,Cname);
-					DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
-					System.out.println("stucked????");					
-					if(contains_A_record(nxt_pkt)){
-						found = true;
-						System.out.println("find confirm");
-					}
-						
+		}
+
+		boolean add_cname_a_record = false;
+		List<DNSResourceRecord> ARecords = new ArrayList<DNSResourceRecord>();
+		if(!found && !cname_records.isEmpty()){
+			
+			for(DNSResourceRecord temp_r: cname_records){
+				String Cname = ((DNSRdataName)temp_r.getData()).getName();
+				System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
+				DatagramPacket p = construct_query(packet,Cname);
+				DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
+				System.out.println("stucked????");					
+				if(contains_A_record(nxt_pkt)){
+
+					add_cname_a_record = true;
+					System.out.println("find confirm");
 					List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-					if(!answers.isEmpty() && !found){
-						 for(DNSResourceRecord temp_record: answers){
-							 if(temp_record.getType() == DNS.TYPE_CNAME){
-								add_cname_entry(cname_records,temp_record);
+					if(!answers.isEmpty()){
+					 	for(DNSResourceRecord temp_record: answers){
+							 if(temp_record.getType() == DNS.TYPE_A){
+								ARecords.add(temp_record);
 							 }
 						 }
 					}
-					return_pkt = nxt_pkt;
+					break;
+
 				}
-			}
+					
+				
+				
+			}			
 		}
+
+
 		if(return_pkt == null)
 			return in_pkt;
 		
@@ -267,6 +278,11 @@ public class SimpleDNS
 			//if(temp_record.getType() == DNS.TYPE_CNAME){
 				result_dns.addAnswer(temp_record);
 			//}	
+		}
+		if(add_cname_a_record){
+			for(DNSResourceRecord temp_record:ARecords){
+					result_dns.addAnswer(temp_record);
+			}
 		}
 		//System.out.println(result_dns.toString());
 		byte[] buf = result_dns.serialize();
