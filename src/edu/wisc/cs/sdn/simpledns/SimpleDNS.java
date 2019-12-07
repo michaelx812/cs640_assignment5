@@ -412,9 +412,26 @@ public class SimpleDNS
 		packet = new DatagramPacket(buf, buf.length);
 		return packet;
 	}
-	private static long string_to_ip(String s){
-		String[] ips = s.split("\\.");
-		long ipInt = Long.parseLong(ips[0])<<24 + Long.parseLong(ips[1])<<16 + Long.parseLong(ips[2])<<8 + Long.parseLong(ips[3]);
-		return ipInt;
-	}
+	public static long string_to_ip(String ipAddress) {
+		
+		long result = 0;
+			
+		String[] ipAddressInArray = ipAddress.split("\\.");
+	
+		for (int i = 3; i >= 0; i--) {
+				
+			long ip = Long.parseLong(ipAddressInArray[3 - i]);
+				
+			//left shifting 24,16,8,0 and bitwise OR
+				
+			//1. 192 << 24
+			//1. 168 << 16
+			//1. 1   << 8
+			//1. 2   << 0
+			result |= ip << (i * 8);
+			
+		}
+	
+		return result;
+	  }
 }
