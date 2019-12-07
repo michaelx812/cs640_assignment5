@@ -125,8 +125,7 @@ public class SimpleDNS
 				DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
 				List<DNSResourceRecord> answers = dns.getAnswers();
 				for(DNSResourceRecord record : answers){
-					//|| record.getType() == DNS.TYPE_AAAA
-					if(record.getType() == DNS.TYPE_A ){
+					if(record.getType() == DNS.TYPE_A || record.getType() == DNS.TYPE_AAAA){
 						for(DNSResourceRecord pastRecord : recordList){
 							dns.addAnswer(pastRecord);
 						}
@@ -163,7 +162,8 @@ public class SimpleDNS
 				System.out.println("processing auth:"+auth_string+"     addtional:"+add_entry.getName());
 				String add_string = add_entry.getData().toString();
 				if(auth_entry.getType()==DNS.TYPE_NS && 
-					(add_entry.getType()==DNS.TYPE_A ||add_entry.getType()==DNS.TYPE_AAAA) && 
+				//||add_entry.getType()==DNS.TYPE_AAAA
+					(add_entry.getType()==DNS.TYPE_A ) && 
 					auth_string.equals(add_entry.getName())){
 						InetAddress nxt_server = InetAddress.getByName(add_string);
 						System.out.println("nxt server:"+auth_string+" : "+nxt_server);
