@@ -44,7 +44,6 @@ public class SimpleDNS
 		}
 
 		parse_csv(args[3]);
-		System.out.println("Finish parse");
 
 		DatagramSocket socket = null;
 		DatagramPacket packet = new DatagramPacket(new byte[1500], 1500);
@@ -55,17 +54,18 @@ public class SimpleDNS
 			e.printStackTrace();
 			System.exit(1);
 		}
-		System.out.println("Entering while");
 		while(true){
 			try{
 				socket.receive(packet);
 				System.out.println("Socket received!!!!!!!");
+				
 				DNS dns = DNS.deserialize(packet.getData(), packet.getLength());
 				if(dns.getOpcode() != (byte)0){
 					continue;
 				}
 				List<DNSQuestion> dns_qs = dns.getQuestions();
 				DNSQuestion dnsquestion =  dns_qs.get(0);
+				System.out.println(dnsquestion.toString());
 				short q_type = dnsquestion.getType();
 				if( q_type!= DNS.TYPE_A && q_type!= DNS.TYPE_AAAA && 
 					q_type!=DNS.TYPE_CNAME && q_type!=DNS.TYPE_NS){
