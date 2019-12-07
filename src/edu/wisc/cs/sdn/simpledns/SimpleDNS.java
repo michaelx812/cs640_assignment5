@@ -108,6 +108,7 @@ public class SimpleDNS
 		DatagramSocket socket = new DatagramSocket();
 		DatagramPacket forward_pkt = new DatagramPacket(packet.getData(),packet.getLength(),server_ip,SERVER_PORT_NUM);
 		DatagramPacket receive_pkt = new DatagramPacket(new byte[1500], 1500);
+		System.out.println("Send query to"+server_ip.toString());
 		socket.send(forward_pkt);
 		socket.receive(receive_pkt);
 		socket.close();
@@ -163,6 +164,7 @@ public class SimpleDNS
 					(add_entry.getType()==DNS.TYPE_A ||add_entry.getType()==DNS.TYPE_AAAA) && 
 					auth_string.equals(add_entry.getName())){
 						InetAddress nxt_server = InetAddress.getByName(add_string);
+						System.out.println("nxt server:"+auth_string+" : "+nxt_server);
 						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server,ttl-1);
 						if(nxt_pkt!=null){
 							return nxt_pkt;
