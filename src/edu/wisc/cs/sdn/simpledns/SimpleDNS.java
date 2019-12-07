@@ -82,6 +82,7 @@ public class SimpleDNS
 					System.exit(1);
 				}
 				DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
+				System.out.println(answer.toString());
 				socket.send(answer);
 				
 			}catch(Exception e){
