@@ -81,8 +81,9 @@ public class SimpleDNS
 					System.out.println("Get receive_pkt==null; should never happen!!!!!");
 					System.exit(1);
 				}
+				System.out.println(receive_pkt.toString());
+
 				DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
-				System.out.println(answer.toString());
 				socket.send(answer);
 				
 			}catch(Exception e){
