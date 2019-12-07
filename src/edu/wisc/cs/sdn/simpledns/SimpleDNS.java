@@ -394,7 +394,7 @@ public class SimpleDNS
 					String entry_Ip_str = entry.ip;
 					int entry_Ip_Int = string_to_ip(entry_Ip_str);
 					int mask = 0xffffffff << (32-entry.mask);
-					System.out.println("non comparing "+record_ip_Str+"   to   "+entry_Ip_str);
+					System.out.println("non comparing "+record_ip_Int+"   to   "+entry_Ip_Int);
 					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
 						DNSRdata data = new DNSRdataString(entry.location + "-" + record_ip_Str);
 						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), DNS.TYPE_EC2,data);
