@@ -125,7 +125,8 @@ public class SimpleDNS
 				DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
 				List<DNSResourceRecord> answers = dns.getAnswers();
 				for(DNSResourceRecord record : answers){
-					if(record.getType() == DNS.TYPE_A || record.getType() == DNS.TYPE_AAAA){
+					//|| record.getType() == DNS.TYPE_AAAA
+					if(record.getType() == DNS.TYPE_A ){
 						for(DNSResourceRecord pastRecord : recordList){
 							dns.addAnswer(pastRecord);
 						}
