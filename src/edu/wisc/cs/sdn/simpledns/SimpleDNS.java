@@ -389,11 +389,11 @@ public class SimpleDNS
 				DNSRdataAddress record_ip = (DNSRdataAddress)record.getData();
 				String record_ip_Str = record_ip.getAddress().toString().substring(1);
 				//System.out.println(ips[0]);
-				int record_ip_Int = string_to_ip(record_ip_Str);
+				long record_ip_Int = string_to_ip(record_ip_Str);
 				for(CSVEntry entry : csv_entries){
 					String entry_Ip_str = entry.ip;
-					int entry_Ip_Int = string_to_ip(entry_Ip_str);
-					int mask = 0xffffffff << (32-entry.mask);
+					long entry_Ip_Int = string_to_ip(entry_Ip_str);
+					long mask = 0xffffffff << (32-entry.mask);
 					System.out.println("mask ="+mask +"    num="+entry_Ip_Int+"    str="+entry_Ip_str);
 					System.out.println("non comparing "+record_ip_Str+"   to   "+(entry_Ip_Int&mask));
 					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
@@ -412,11 +412,9 @@ public class SimpleDNS
 		packet = new DatagramPacket(buf, buf.length);
 		return packet;
 	}
-	private static int string_to_ip(String s){
+	private static long string_to_ip(String s){
 		String[] ips = s.split("\\.");
-		int ipInt = Integer.parseInt(ips[0])<<24+
-				Integer.parseInt(ips[1])<<16+
-				Integer.parseInt(ips[2])<<8 + Integer.parseInt(ips[3]);
+		long ipInt = Long.parseLong(ips[0])<<24 + Long.parseLong(ips[1])<<16 + Long.parseLong(ips[2])<<8 + Long.parseLong(ips[3]);
 		return ipInt;
 	}
 }
