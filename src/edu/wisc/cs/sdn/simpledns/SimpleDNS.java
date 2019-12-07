@@ -209,7 +209,7 @@ public class SimpleDNS
 			}
 		}
 		if(found){
-			DNS result_dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
+			DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
 			for(DNSResourceRecord temp_record:cname_records){
 				result_dns.addAnswer(temp_record);
 			}
