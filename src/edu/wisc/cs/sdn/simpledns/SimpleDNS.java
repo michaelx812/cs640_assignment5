@@ -163,9 +163,9 @@ public class SimpleDNS
 		List<DNSResourceRecord> additions = dns.getAdditional();
 		for(DNSResourceRecord auth_entry: auths){
 			for(DNSResourceRecord add_entry: additions){
-				String auth_string = auth_entry.getData().toString();
+				String auth_string = ((DNSRdataString)(auth_entry.getData())).toString();
 				System.out.println("processing auth:"+auth_string+"     addtional:"+add_entry.getName());
-				String add_string = add_entry.getData().toString();
+				String add_string = ((DNSRdataString)(add_entry.getData())).toString();
 				if(auth_entry.getType()==DNS.TYPE_NS && 
 				//||add_entry.getType()==DNS.TYPE_AAAA
 					(add_entry.getType()==DNS.TYPE_A ) && 
