@@ -54,7 +54,7 @@ public class SimpleDNS
 			e.printStackTrace();
 			System.exit(1);
 		}
-
+		System.out.println("Entering while");
 		while(true){
 			try{
 				socket.receive(packet);
