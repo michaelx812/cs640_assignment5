@@ -216,9 +216,9 @@ public class SimpleDNS
 		for(DNSResourceRecord record : answers){
 			if(record.getType() == DNS.TYPE_A){
 				InetAddress ip = InetAddress.getByName(record.getData().toString());
-				String ipStr = ip.toString();
+				String ipStr = ip.toString().substring(1);
 				String[] ips = ipStr.split(".");
-				System.out.println(ips[0]);
+				//System.out.println(ips[0]);
 				int ipInt = Integer.parseInt(ips[0])*256*256*256+
 				Integer.parseInt(ips[1])*256*256+
 				Integer.parseInt(ips[2])*256+ Integer.parseInt(ips[3]);
