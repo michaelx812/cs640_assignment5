@@ -8,12 +8,15 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
 import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdata;
+import edu.wisc.cs.sdn.simpledns.packet.DNSRdataAddress;
+import edu.wisc.cs.sdn.simpledns.packet.DNSRdataName;
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
@@ -52,7 +55,7 @@ public class SimpleDNS
 		DatagramPacket packet = new DatagramPacket(new byte[1500], 1500);
 
 		try{	
-		socket = new DatagramSocket(RECEIVE_PORT_NUM);
+			socket = new DatagramSocket(RECEIVE_PORT_NUM);
 		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(1);
@@ -63,9 +66,10 @@ public class SimpleDNS
 				System.out.println("Socket received!!!!!!!");
 				
 				DNS dns = DNS.deserialize(packet.getData(), packet.getLength());
-				if(dns.getOpcode() != (byte)0){
+				if(dns.getOpcode() != DNS.OPCODE_STANDARD_QUERY){
 					continue;
 				}
+				//get query 
 				List<DNSQuestion> dns_qs = dns.getQuestions();
 				DNSQuestion dnsquestion =  dns_qs.get(0);
 				System.out.println(dnsquestion.toString());
@@ -76,7 +80,7 @@ public class SimpleDNS
 				}
 				DatagramPacket receive_pkt = null;
 				if(dns.isRecursionDesired()){
-					receive_pkt = handle_recur(packet,root_server_ip);
+					receive_pkt = recur_helper(packet,root_server_ip);
 				}else{
 					receive_pkt = handle_non_recur(packet,root_server_ip);
 				}
@@ -120,68 +124,113 @@ public class SimpleDNS
 		return receive_pkt;
 	}
 
-	private static DatagramPacket handle_recur(DatagramPacket packet, InetAddress server_ip) throws Exception{
-		DatagramPacket query_pkt = packet;
+	// private static DatagramPacket handle_recur(DatagramPacket packet, InetAddress server_ip) throws Exception{
+	// 	DatagramPacket query_pkt = packet;
 		
-		List<DNSResourceRecord> recordList = new ArrayList<DNSResourceRecord>();
-		while(true){
-			DatagramPacket in_pkt = recur_helper(query_pkt, server_ip, 20);
-			if(in_pkt != null){
-				DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
-				List<DNSResourceRecord> answers = dns.getAnswers();
-				for(DNSResourceRecord record : answers){
-					if(record.getType() == DNS.TYPE_A || record.getType() == DNS.TYPE_AAAA){
-						for(DNSResourceRecord pastRecord : recordList){
-							dns.addAnswer(pastRecord);
-						}
-						byte[] buf = dns.serialize();
-						DatagramPacket returnPacket = new DatagramPacket(buf,buf.length);
-						return returnPacket;
-					}else if(record.getType() == DNS.TYPE_CNAME){
-						recordList.add(record);
-					}
-				}
+	// 	List<DNSResourceRecord> recordList = new ArrayList<DNSResourceRecord>();
+	// 	while(true){
+	// 		DatagramPacket in_pkt = recur_helper(query_pkt, server_ip, 20);
+	// 		if(in_pkt != null){
+	// 			DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
+	// 			List<DNSResourceRecord> answers = dns.getAnswers();
+	// 			for(DNSResourceRecord record : answers){
+	// 				if(record.getType() == DNS.TYPE_A || record.getType() == DNS.TYPE_AAAA){
+	// 					for(DNSResourceRecord pastRecord : recordList){
+	// 						dns.addAnswer(pastRecord);
+	// 					}
+	// 					byte[] buf = dns.serialize();
+	// 					DatagramPacket returnPacket = new DatagramPacket(buf,buf.length);
+	// 					return returnPacket;
+	// 				}else if(record.getType() == DNS.TYPE_CNAME){
+	// 					recordList.add(record);
+	// 				}
+	// 			}
 
-			}else{
-				return null;
-			}
-		}
+	// 		}else{
+	// 			return null;
+	// 		}
+	// 	}
 
-	}
+	// }
 
-	private static DatagramPacket recur_helper(DatagramPacket packet,InetAddress server_ip,int ttl) throws Exception{
-		if(ttl == 0){
-			return null;
-		}
+	private static DatagramPacket recur_helper(DatagramPacket packet,InetAddress server_ip) throws Exception{
+
 		DatagramPacket in_pkt = handle_non_recur(packet, server_ip);
 		DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
 		//System.out.println(dns.toString());
-		List<DNSResourceRecord> answers = dns.getAnswers();
-		if(answers.size()>0){
+		if(contains_A_record(in_pkt)){
 			return in_pkt;
 		}
 		List<DNSResourceRecord> auths = dns.getAuthorities();
 		List<DNSResourceRecord> additions = dns.getAdditional();
+		if(auths.size()==0){
+			return in_pkt;
+		}
+
+		DatagramPacket return_pkt = null;
+		boolean found = false;
+		CopyOnWriteArrayList<DNSResourceRecord> cname_records = new CopyOnWriteArrayList<DNSResourceRecord>();
 		for(DNSResourceRecord auth_entry: auths){
+			if(found == true)
+				break;
+			
+			if(auth_entry.getType() != DNS.TYPE_NS)
+				continue;
+			
+			String auth_name = ((DNSRdataName)auth_entry.getData()).toString();
+			System.out.println("processing auth:"+auth_name);
+
 			for(DNSResourceRecord add_entry: additions){
-				String auth_string = auth_entry.getData().toString();
-				System.out.println("processing auth:"+auth_string+"     addtional:"+add_entry.getName());
-				String add_string = add_entry.getData().toString();
-				if(auth_entry.getType()==DNS.TYPE_NS && 
-				//||add_entry.getType()==DNS.TYPE_AAAA
-					(add_entry.getType()==DNS.TYPE_A ) && 
-					auth_string.equals(add_entry.getName())){
-						InetAddress nxt_server = InetAddress.getByName(add_string);
-						System.out.println("nxt server:"+auth_string+" : "+nxt_server);
-						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server,ttl-1);
-						if(nxt_pkt!=null){
-							return nxt_pkt;
+				if(add_entry.getType()!=DNS.TYPE_A)
+					continue;
+				
+				String add_name = add_entry.getName();
+				if(auth_name == add_name){
+						InetAddress nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
+						System.out.println("nxt server:"+auth_name+" : "+nxt_server);
+						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
+						if(contains_A_record(nxt_pkt))
+							found = true;
+						List<DNSResourceRecord> answers = get_answers(nxt_pkt);
+						if(!answers.isEmpty()){
+							for(DNSResourceRecord temp_record: answers){
+								if(temp_record.getType() == DNS.TYPE_CNAME){
+									cname_records.add(temp_record);
+								}
+							}
 						}
+						return_pkt = nxt_pkt;
 				}
 			}
 		}
-		System.out.println("default null of recur func");
-		return null;
+		if(found){
+			DNS result_dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
+			for(DNSResourceRecord temp_record:cname_records){
+				result_dns.addAnswer(temp_record);
+			}
+			byte[] buf = result_dns.serialize();
+			return_pkt = new DatagramPacket(buf,buf.length);
+		}
+
+		return return_pkt;
+	}
+
+	private static List<DNSResourceRecord> get_answers(DatagramPacket pkt){
+		DNS dns = DNS.deserialize(pkt.getData(), pkt.getLength());
+		List<DNSResourceRecord> answers = new ArrayList<DNSResourceRecord>(dns.getAnswers());
+		return answers;
+	}
+
+	private static boolean contains_A_record(DatagramPacket pkt) {
+		List<DNSResourceRecord> answers = get_answers(pkt);
+		if(answers.size()>0){
+			for(DNSResourceRecord ans: answers){
+				if(ans.getType()==DNS.TYPE_A){
+					return true;
+				}
+			}	
+		}
+		return false;
 	}
 
 	private static void parse_csv(String filename){
