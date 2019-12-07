@@ -393,7 +393,7 @@ public class SimpleDNS
 				for(CSVEntry entry : csv_entries){
 					String entry_Ip_str = entry.ip;
 					long entry_Ip_Int = string_to_ip(entry_Ip_str);
-					long mask = 0xffffffff << (32-entry.mask);
+					long mask = 0x00000000ffffffff << (32-entry.mask);
 					System.out.println("mask ="+mask +"    num="+entry_Ip_Int+"    str="+entry_Ip_str);
 					System.out.println("non comparing "+record_ip_Str+"   to   "+(entry_Ip_Int&mask));
 					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
