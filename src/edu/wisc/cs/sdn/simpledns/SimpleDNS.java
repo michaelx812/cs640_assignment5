@@ -170,7 +170,7 @@ public class SimpleDNS
 				}
 			}
 		}
-
+		System.out.println("default null of recur func");
 		return null;
 	}
 
