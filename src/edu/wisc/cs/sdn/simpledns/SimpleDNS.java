@@ -315,22 +315,16 @@ public class SimpleDNS
 
 	private static DatagramPacket construct_query(DatagramPacket prev,String name){
 		DNS prev_dns = DNS.deserialize(prev.getData(), prev.getLength());
-		DNS dns = new DNS();
-		DNSQuestion question = new DNSQuestion(name, DNS.TYPE_A);
-		List<DNSQuestion> questions = new ArrayList<DNSQuestion>();
-		questions.add(question);
-		dns.setQuestions(questions);
-		dns.setQuery(true);
-		dns.setOpcode(DNS.OPCODE_STANDARD_QUERY);
-		dns.setAuthoritative(false);
-		dns.setTruncated(false);
-		dns.setRecursionAvailable(true);
-		dns.setRecursionDesired(true);
-		dns.setAuthenicated(false);
-		dns.setCheckingDisabled(false);
-		dns.setRcode((byte) 0);
-		dns.setId(prev_dns.getId());
-		return new DatagramPacket(dns.serialize(), dns.getLength());
+		
+		//DNSQuestion question = new DNSQuestion(name, DNS.TYPE_A);
+		List<DNSQuestion> questions = prev_dns.getQuestions();
+		DNSQuestion question = questions.get(0);
+		question.setName(name);
+		List<DNSQuestion> modified_questions = new ArrayList<DNSQuestion>();
+		modified_questions.add(question);
+		prev_dns.setQuestions(modified_questions);
+		return new DatagramPacket(prev_dns.serialize(), prev_dns.getLength());
+	
 	}
 
 	private static void parse_csv(String filename){
