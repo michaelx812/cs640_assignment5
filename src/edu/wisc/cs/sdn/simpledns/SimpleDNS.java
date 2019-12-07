@@ -84,9 +84,9 @@ public class SimpleDNS
 					System.out.println("Get receive_pkt==null; should never happen!!!!!");
 					System.exit(1);
 				}
-				// if(q_type == DNS.TYPE_A){
-				// 	receive_pkt = addCSVRecord(receive_pkt);
-				// }
+				if(q_type == DNS.TYPE_A){
+					receive_pkt = addCSVRecord(receive_pkt);
+				}
 				
 				//DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
 				receive_pkt.setPort(packet.getPort());
@@ -229,7 +229,7 @@ public class SimpleDNS
 					int entryIpInt = Integer.parseInt(entryIps[0])*256*256*256+
 					Integer.parseInt(entryIps[1])*256*256+
 					Integer.parseInt(entryIps[2])*256+ Integer.parseInt(entryIps[3]);
-					if(ipInt >> entry.mask == entryIpInt >> entry.mask){
+					if(ipInt >> (32-entry.mask) == entryIpInt >> (32-entry.mask)){
 						DNSRdata data = new DNSRdataString(entry.location + "-" + ipStr);
 						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), DNS.TYPE_EC2,data);
 						dns.addAnswer(newRecord);
