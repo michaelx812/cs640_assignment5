@@ -218,7 +218,7 @@ public class SimpleDNS
 				InetAddress ip = InetAddress.getByName(record.getData().toString());
 				String ipStr = ip.toString();
 				String[] ips = ipStr.split(".");
-				System.out.println(ipStr);
+				System.out.println(ips[0]);
 				int ipInt = Integer.parseInt(ips[0])*256*256*256+
 				Integer.parseInt(ips[1])*256*256+
 				Integer.parseInt(ips[2])*256+ Integer.parseInt(ips[3]);
