@@ -198,55 +198,58 @@ public class SimpleDNS
 							System.out.println("find confirm");
 						}
 							
-						List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-						if(!answers.isEmpty()){
-							for(DNSResourceRecord temp_record: answers){
-								if(temp_record.getType() == DNS.TYPE_CNAME){
-									cname_records.add(temp_record);
-								}
-							}
-						}
+						// List<DNSResourceRecord> answers = get_answers(nxt_pkt);
+						// if(!answers.isEmpty()){
+						// 	for(DNSResourceRecord temp_record: answers){
+						// 		if(temp_record.getType() == DNS.TYPE_CNAME){
+						// 			cname_records.add(temp_record);
+						// 		}
+						// 	}
+						// }
 						return_pkt = nxt_pkt;
 				}
 			}
-			if(!matches){
-				DatagramPacket quesr_on_auth_packet = construct_query(packet,auth_name);
-				DatagramPacket recur_on_auth = recur_helper(quesr_on_auth_packet, root_server_ip);
-				if(contains_A_record(recur_on_auth)){
-					for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
-						if(temp_record.getType() == DNS.TYPE_A){
-							nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
-							DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
-							if(contains_A_record(nxt_pkt)){
-								found = true;
-								System.out.println("find confirm");
-							}
+			// if(!matches){
+			// 	DatagramPacket quesr_on_auth_packet = construct_query(packet,auth_name);
+			// 	DatagramPacket recur_on_auth = recur_helper(quesr_on_auth_packet, root_server_ip);
+			// 	if(contains_A_record(recur_on_auth)){
+			// 		for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
+			// 			if(temp_record.getType() == DNS.TYPE_A){
+			// 				nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
+			// 				DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
+			// 				if(contains_A_record(nxt_pkt)){
+			// 					found = true;
+			// 					System.out.println("find confirm");
+			// 				}
 								
-							List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-							if(!answers.isEmpty()){
-								for(DNSResourceRecord return_recs: answers){
-									if(return_recs.getType() == DNS.TYPE_CNAME){
-										cname_records.add(return_recs);
-									}
-								}
-							}
-						return_pkt = nxt_pkt;
-						}
-					}
-				}
-			}
+			// 				List<DNSResourceRecord> answers = get_answers(nxt_pkt);
+			// 				if(!answers.isEmpty()){
+			// 					for(DNSResourceRecord return_recs: answers){
+			// 						if(return_recs.getType() == DNS.TYPE_CNAME){
+			// 							cname_records.add(return_recs);
+			// 						}
+			// 					}
+			// 				}
+			// 			return_pkt = nxt_pkt;
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 		if(return_pkt == null)
 			return in_pkt;
-		if(true){
-			DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
-			for(DNSResourceRecord temp_record:cname_records){
+		
+
+		DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
+		for(DNSResourceRecord temp_record:dns.getAnswers()){
+			if(temp_record.getType() == DNS.TYPE_CNAME){
 				result_dns.addAnswer(temp_record);
-			}
-			System.out.println(result_dns.toString());
-			byte[] buf = result_dns.serialize();
-			return_pkt = new DatagramPacket(buf,buf.length);
+			}	
 		}
+		System.out.println(result_dns.toString());
+		byte[] buf = result_dns.serialize();
+		return_pkt = new DatagramPacket(buf,buf.length);
+		
 		
 		return return_pkt;
 	}
