@@ -155,7 +155,7 @@ public class SimpleDNS
 		}
 		DatagramPacket in_pkt = handle_non_recur(packet, server_ip);
 		DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
-		System.out.println(dns.toString());
+		//System.out.println(dns.toString());
 		List<DNSResourceRecord> answers = dns.getAnswers();
 		if(answers.size()>0){
 			return in_pkt;
