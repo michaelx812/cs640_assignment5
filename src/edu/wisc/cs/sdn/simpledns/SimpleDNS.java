@@ -198,7 +198,7 @@ public class SimpleDNS
 						}
 							
 						List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-						if(!answers.isEmpty()){
+						if(!answers.isEmpty() && !found){
 						 	for(DNSResourceRecord temp_record: answers){
 						 		if(temp_record.getType() == DNS.TYPE_CNAME){
 									add_cname_entry(cname_records,temp_record);
