@@ -191,8 +191,11 @@ public class SimpleDNS
 						InetAddress nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
 						System.out.println("nxt server:"+auth_name+" : "+nxt_server);
 						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
-						if(contains_A_record(nxt_pkt))
+						if(contains_A_record(nxt_pkt)){
 							found = true;
+							System.out.println("find confirm");
+						}
+							
 						List<DNSResourceRecord> answers = get_answers(nxt_pkt);
 						if(!answers.isEmpty()){
 							for(DNSResourceRecord temp_record: answers){
@@ -210,6 +213,7 @@ public class SimpleDNS
 			for(DNSResourceRecord temp_record:cname_records){
 				result_dns.addAnswer(temp_record);
 			}
+			System.out.println(result_dns.toString());
 			byte[] buf = result_dns.serialize();
 			return_pkt = new DatagramPacket(buf,buf.length);
 		}
