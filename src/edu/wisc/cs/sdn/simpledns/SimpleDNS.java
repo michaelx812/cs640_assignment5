@@ -197,15 +197,15 @@ public class SimpleDNS
 			}
 			if(!matches){
 				continue;
-				DatagramPacket recur_on_auth = recur_helper(packet, root_server_ip);
-				if(contains_A_record(recur_on_auth)){
-					for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
-						if(temp_record.getType() == DNS.TYPE_A){
-							nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
-							break;
-						}
-					}
-				}
+				// DatagramPacket recur_on_auth = recur_helper(packet, root_server_ip);
+				// if(contains_A_record(recur_on_auth)){
+				// 	for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
+				// 		if(temp_record.getType() == DNS.TYPE_A){
+				// 			nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
+				// 			break;
+				// 		}
+				// 	}
+				// }
 			}
 			DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
 						if(contains_A_record(nxt_pkt)){
