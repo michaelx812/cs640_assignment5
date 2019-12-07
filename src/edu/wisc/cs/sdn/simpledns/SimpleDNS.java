@@ -196,16 +196,16 @@ public class SimpleDNS
 				}
 			}
 			if(!matches){
-				continue;
-				// DatagramPacket recur_on_auth = recur_helper(packet, root_server_ip);
-				// if(contains_A_record(recur_on_auth)){
-				// 	for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
-				// 		if(temp_record.getType() == DNS.TYPE_A){
-				// 			nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
-				// 			break;
-				// 		}
-				// 	}
-				// }
+				DatagramPacket quesr_on_auth_packet = construct_query(packet,auth_name);
+				DatagramPacket recur_on_auth = recur_helper(quesr_on_auth_packet, root_server_ip);
+				if(contains_A_record(recur_on_auth)){
+					for(DNSResourceRecord temp_record: get_answers(recur_on_auth)){
+						if(temp_record.getType() == DNS.TYPE_A){
+							nxt_server = ((DNSRdataAddress)temp_record.getData()).getAddress();
+							break;
+						}
+					}
+				}
 			}
 			DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
 						if(contains_A_record(nxt_pkt)){
@@ -254,6 +254,26 @@ public class SimpleDNS
 			}	
 		}
 		return false;
+	}
+
+	private static DatagramPacket construct_query(DatagramPacket prev,String name){
+		DNS prev_dns = DNS.deserialize(prev.getData(), prev.getLength());
+		DNS dns = new DNS();
+		DNSQuestion question = new DNSQuestion(name, DNS.TYPE_A);
+		List<DNSQuestion> questions = new ArrayList<DNSQuestion>();
+		questions.add(question);
+		dns.setQuestions(questions);
+		dns.setQuery(true);
+		dns.setOpcode(DNS.OPCODE_STANDARD_QUERY);
+		dns.setAuthoritative(false);
+		dns.setTruncated(false);
+		dns.setRecursionAvailable(true);
+		dns.setRecursionDesired(true);
+		dns.setAuthenicated(false);
+		dns.setCheckingDisabled(false);
+		dns.setRcode((byte) 0);
+		dns.setId(prev_dns.getId());
+		return new DatagramPacket(dns.serialize(), dns.getLength());
 	}
 
 	private static void parse_csv(String filename){
