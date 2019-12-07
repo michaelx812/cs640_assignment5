@@ -254,9 +254,13 @@ public class SimpleDNS
 	}
 
 	private static void add_cname_entry(List<DNSResourceRecord> list, DNSResourceRecord record){
+		System.out.println("adding cname entry+++++++++++++++++++++++++++");
+
 		boolean dup = false;
 		for(DNSResourceRecord temp: list){
+			System.out.println("processing temp:"+temp.toString());
 			if(((DNSRdataName)temp.getData()).getName().equals(((DNSRdataName)record.getData()).getName())){
+				System.out.println("===================dup with:"+record.toString());
 				return;
 			}
 		}
