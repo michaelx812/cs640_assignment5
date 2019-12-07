@@ -58,6 +58,7 @@ public class SimpleDNS
 		while(true){
 			try{
 				socket.receive(packet);
+				System.out.println("Socket received!!!!!!!");
 				DNS dns = DNS.deserialize(packet.getData(), packet.getLength());
 				if(dns.getOpcode() != (byte)0){
 					continue;
