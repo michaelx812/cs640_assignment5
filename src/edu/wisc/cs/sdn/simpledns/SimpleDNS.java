@@ -240,6 +240,7 @@ public class SimpleDNS
 					System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
 					DatagramPacket p = construct_query(packet,Cname);
 					DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
+					System.out.println("stucked????");					
 					if(contains_A_record(nxt_pkt)){
 						found = true;
 						System.out.println("find confirm");
