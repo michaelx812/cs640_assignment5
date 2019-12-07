@@ -160,6 +160,7 @@ public class SimpleDNS
 		//System.out.println(dns.toString());
 		System.out.println(dns.toString());
 		if(contains_A_record(in_pkt)){
+			System.out.println("Get A!!!!!!!!!!!!!!!!!!!!!!!!!");
 			return in_pkt;
 		}
 		List<DNSResourceRecord> auths = dns.getAuthorities();
