@@ -30,7 +30,7 @@ public class SimpleDNS
 
 	public static void main(String[] args)
 	{
-		
+		System.out.println("Hello!!!");
         if(args.length!=4 || !args[0].equals("-r") || !args[2].equals("-e")){
 			System.out.println("Error :invalid arguments");
 			System.exit(1);
