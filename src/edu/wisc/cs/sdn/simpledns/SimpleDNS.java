@@ -185,7 +185,7 @@ public class SimpleDNS
 					continue;
 				
 				String add_name = add_entry.getName();
-				if(auth_name == add_name){
+				if(auth_name.equals(add_name)){
 						InetAddress nxt_server = ((DNSRdataAddress)add_entry.getData()).getAddress();
 						System.out.println("nxt server:"+auth_name+" : "+nxt_server);
 						DatagramPacket nxt_pkt= recur_helper(packet,nxt_server);
