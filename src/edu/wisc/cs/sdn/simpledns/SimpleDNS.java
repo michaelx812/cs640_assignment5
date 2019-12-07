@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
@@ -330,7 +331,8 @@ public class SimpleDNS
 	}
 
 	private static DatagramPacket construct_query(DatagramPacket prev,String name){
-		DNS prev_dns = DNS.deserialize(prev.getData(), prev.getLength());
+		byte[] new_buff =  Arrays.copyOf(prev.getData(), prev.getLength());
+		DNS prev_dns = DNS.deserialize(new_buff, new_buff.length);
 		
 		//DNSQuestion question = new DNSQuestion(name, DNS.TYPE_A);
 		List<DNSQuestion> questions = prev_dns.getQuestions();
