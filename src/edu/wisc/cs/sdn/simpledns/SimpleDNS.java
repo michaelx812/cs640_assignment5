@@ -44,6 +44,7 @@ public class SimpleDNS
 		}
 
 		parse_csv(args[3]);
+		System.out.println("Finish parse");
 
 		DatagramSocket socket = null;
 		DatagramPacket packet = new DatagramPacket(new byte[1500], 1500);
