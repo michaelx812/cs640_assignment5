@@ -399,7 +399,7 @@ public class SimpleDNS
 					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
 						System.out.println("FInd + "+entry_Ip_str);
 						DNSRdata data = new DNSRdataString(entry.location + "-" + record_ip_Str);
-						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), DNS.TYPE_EC2,data);
+						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), (short)16,data);
 						txts.add(newRecord);
 					}
 				}
