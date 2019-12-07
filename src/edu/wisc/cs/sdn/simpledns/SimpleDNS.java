@@ -237,6 +237,7 @@ public class SimpleDNS
 			if(!found && !cname_records.isEmpty()){
 				for(DNSResourceRecord temp_r: cname_records){
 					String Cname = ((DNSRdataName)temp_r.getData()).getName();
+					System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
 					DatagramPacket p = construct_query(packet,Cname);
 					DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
 					if(contains_A_record(nxt_pkt)){
