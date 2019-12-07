@@ -219,7 +219,7 @@ public class SimpleDNS
 
 	private static List<DNSResourceRecord> get_answers(DatagramPacket pkt){
 		DNS dns = DNS.deserialize(pkt.getData(), pkt.getLength());
-		List<DNSResourceRecord> answers = new ArrayList<DNSResourceRecord>(dns.getAnswers());
+		List<DNSResourceRecord> answers = dns.getAnswers();
 		return answers;
 	}
 
