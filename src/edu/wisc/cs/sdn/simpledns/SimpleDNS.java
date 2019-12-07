@@ -197,14 +197,14 @@ public class SimpleDNS
 							System.out.println("find confirm");
 						}
 							
-						// List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-						// if(!answers.isEmpty()){
-						// 	for(DNSResourceRecord temp_record: answers){
-						// 		if(temp_record.getType() == DNS.TYPE_CNAME){
-						// 			cname_records.add(temp_record);
-						// 		}
-						// 	}
-						// }
+						List<DNSResourceRecord> answers = get_answers(nxt_pkt);
+						if(!answers.isEmpty()){
+						 	for(DNSResourceRecord temp_record: answers){
+						 		if(temp_record.getType() == DNS.TYPE_CNAME){
+									add_cname_entry(cname_records,temp_record);
+						 		}
+						 	}
+						}
 						return_pkt = nxt_pkt;
 				}
 			}
@@ -240,10 +240,10 @@ public class SimpleDNS
 		
 
 		DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
-		for(DNSResourceRecord temp_record:dns.getAnswers()){
-			if(temp_record.getType() == DNS.TYPE_CNAME){
+		for(DNSResourceRecord temp_record:cname_records){
+			//if(temp_record.getType() == DNS.TYPE_CNAME){
 				result_dns.addAnswer(temp_record);
-			}	
+			//}	
 		}
 		//System.out.println(result_dns.toString());
 		byte[] buf = result_dns.serialize();
@@ -253,11 +253,26 @@ public class SimpleDNS
 		return return_pkt;
 	}
 
+	private static void add_cname_entry(List<DNSResourceRecord> list, DNSResourceRecord record){
+		boolean dup = false;
+		for(DNSResourceRecord temp: list){
+			if(((DNSRdataName)temp.getData()).getName().equals(((DNSRdataName)record.getData()).getName())){
+				return;
+			}
+		}
+		if(!dup){
+			list.add(record);
+		}
+		return;
+	}
+
 	private static List<DNSResourceRecord> get_answers(DatagramPacket pkt){
 		DNS dns = DNS.deserialize(pkt.getData(), pkt.getLength());
 		List<DNSResourceRecord> answers = dns.getAnswers();
 		return answers;
 	}
+
+	
 
 	private static boolean contains_A_record(DatagramPacket pkt) {
 		List<DNSResourceRecord> answers = get_answers(pkt);
