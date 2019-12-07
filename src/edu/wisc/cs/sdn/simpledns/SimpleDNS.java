@@ -83,11 +83,13 @@ public class SimpleDNS
 				}
 				
 
-				DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
-				
-				DNS curdns = DNS.deserialize(answer.getData(),answer.getLength());
-				System.out.println(curdns.toString());
-				socket.send(answer);
+				//DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
+				receive_pkt.setPort(packet.getPort());
+				receive_pkt.setAddress(packet.getAddress());
+
+				//DNS curdns = DNS.deserialize(answer.getData(),answer.getLength());
+				//System.out.println(curdns.toString());
+				socket.send(receive_pkt);
 				
 			}catch(Exception e){
 				e.printStackTrace();
