@@ -160,7 +160,7 @@ public class SimpleDNS
 			for(DNSResourceRecord add_entry: additions){
 				String auth_string = auth_entry.getData().toString();
 				System.out.println("processing auth:"+auth_string+"     addtional:"+add_entry.getName());
-				String add_string = new String(add_entry.getData().serialize());
+				String add_string = add_entry.getData().toString();
 				if(auth_entry.getType()==DNS.TYPE_NS && 
 					(add_entry.getType()==DNS.TYPE_A ||add_entry.getType()==DNS.TYPE_AAAA) && 
 					auth_string.equals(add_entry.getName())){
