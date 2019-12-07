@@ -9,9 +9,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.RecursiveAction;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
 import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
+import edu.wisc.cs.sdn.simpledns.packet.DNSRdata;
+import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
 class CSVEntry
@@ -200,5 +203,35 @@ public class SimpleDNS
 			System.out.println("Cannot parse csv file");
 			System.exit(1);
 		}
+	}
+
+	private static DatagramPacket addCSVRecord(DatagramPacket packet) throws Exception{
+		DNS dns = DNS.deserialize(packet.getData(), packet.getLength());
+		List<DNSResourceRecord> answers = dns.getAnswers();
+		for(DNSResourceRecord record : answers){
+			if(record.getType() == DNS.TYPE_A){
+				InetAddress ip = InetAddress.getByName(record.getData().toString());
+				String ipStr = ip.toString();
+				String[] ips = ipStr.split(".");
+				int ipInt = Integer.parseInt(ips[0])*256*256*256+
+				Integer.parseInt(ips[1])*256*256+
+				Integer.parseInt(ips[2])*256+ Integer.parseInt(ips[3]);
+				for(CSVEntry entry : csv_entries){
+					String entryIp = entry.ip.toString();
+					String[] entryIps = entryIp.split(".");
+					int entryIpInt = Integer.parseInt(entryIps[0])*256*256*256+
+					Integer.parseInt(entryIps[1])*256*256+
+					Integer.parseInt(entryIps[2])*256+ Integer.parseInt(entryIps[3]);
+					if(ipInt >> entry.mask == entryIpInt >> entry.mask){
+						DNSRdata data = new DNSRdataString(entry.location + "-" + ipStr);
+						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), DNS.TYPE_EC2,data);
+						dns.addAnswer(newRecord);
+					}
+				}
+			}
+		}
+		byte[] buf = dns.serialize();
+		packet = new DatagramPacket(buf, buf.length);
+		return packet;
 	}
 }
