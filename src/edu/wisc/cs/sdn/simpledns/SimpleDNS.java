@@ -23,7 +23,7 @@ import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
 class CSVEntry
 {
-	InetAddress ip;
+	String ip;
 	int mask;
 	String location;
 }
@@ -89,9 +89,9 @@ public class SimpleDNS
 					System.out.println("Get receive_pkt==null; should never happen!!!!!");
 					System.exit(1);
 				}
-				// if(q_type == DNS.TYPE_A){
-				// 	receive_pkt = addCSVRecord(receive_pkt);
-				// }
+				if(q_type == DNS.TYPE_A){
+					receive_pkt = addCSVRecord(receive_pkt);
+				}
 				
 				//DatagramPacket answer = new DatagramPacket(receive_pkt.getData(), receive_pkt.getLength(),packet.getAddress(),RECEIVE_PORT_NUM);
 				receive_pkt.setPort(packet.getPort());
@@ -361,7 +361,7 @@ public class SimpleDNS
 			while((line=reader.readLine())!=null){
 				String[] info = line.split(",");
 				String[] ipInfo = info[0].split("/");
-				InetAddress ip = InetAddress.getByName(ipInfo[0]);
+				String ip = ipInfo[0];
 				int mask = Integer.parseInt(ipInfo[1]);
 				String location = info[1];
 				CSVEntry entry = new CSVEntry();
@@ -383,31 +383,37 @@ public class SimpleDNS
 		if(answers.size() == 0){
 			return packet;
 		}
+		List<DNSResourceRecord> txts = new ArrayList<DNSResourceRecord>();
 		for(DNSResourceRecord record : answers){
 			if(record.getType() == DNS.TYPE_A){
-				InetAddress ip = InetAddress.getByName(record.getData().toString());
-				String ipStr = ip.toString().substring(1);
-				String[] ips = ipStr.split("\\.");
+				DNSRdataAddress record_ip = (DNSRdataAddress)record.getData();
+				String record_ip_Str = record_ip.getAddress().toString().substring(1);
 				//System.out.println(ips[0]);
-				int ipInt = Integer.parseInt(ips[0])*256*256*256+
-				Integer.parseInt(ips[1])*256*256+
-				Integer.parseInt(ips[2])*256+ Integer.parseInt(ips[3]);
+				int record_ip_Int = string_to_ip(record_ip_Str);
 				for(CSVEntry entry : csv_entries){
-					String entryIp = entry.ip.toString().substring(1);
-					String[] entryIps = entryIp.split("\\.");
-					int entryIpInt = Integer.parseInt(entryIps[0])*256*256*256+
-					Integer.parseInt(entryIps[1])*256*256+
-					Integer.parseInt(entryIps[2])*256+ Integer.parseInt(entryIps[3]);
-					if(ipInt >> (32-entry.mask) == entryIpInt >> (32-entry.mask)){
-						DNSRdata data = new DNSRdataString(entry.location + "-" + ipStr);
+					String entry_Ip_str = entry.ip;
+					int entry_Ip_Int = string_to_ip(entry_Ip_str);
+					int mask = 0xffffffff << (32-entry.mask);
+					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
+						DNSRdata data = new DNSRdataString(entry.location + "-" + record_ip_Str);
 						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), DNS.TYPE_EC2,data);
-						dns.addAnswer(newRecord);
+						txts.add(newRecord);
 					}
 				}
 			}
 		}
+		for(DNSResourceRecord txt_record: txts){
+			dns.addAnswer(txt_record);
+		}
 		byte[] buf = dns.serialize();
 		packet = new DatagramPacket(buf, buf.length);
 		return packet;
+	}
+	private static int string_to_ip(String s){
+		String[] ips = s.split("\\.");
+		int ipInt = Integer.parseInt(ips[0])<<24+
+				Integer.parseInt(ips[1])<<16+
+				Integer.parseInt(ips[2])<<8 + Integer.parseInt(ips[3]);
+		return ipInt;
 	}
 }
