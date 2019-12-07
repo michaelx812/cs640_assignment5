@@ -223,7 +223,7 @@ public class SimpleDNS
 				Integer.parseInt(ips[1])*256*256+
 				Integer.parseInt(ips[2])*256+ Integer.parseInt(ips[3]);
 				for(CSVEntry entry : csv_entries){
-					String entryIp = entry.ip.toString();
+					String entryIp = entry.ip.toString().substring(1);
 					String[] entryIps = entryIp.split("\\.");
 					int entryIpInt = Integer.parseInt(entryIps[0])*256*256*256+
 					Integer.parseInt(entryIps[1])*256*256+
