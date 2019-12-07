@@ -172,7 +172,6 @@ public class SimpleDNS
 		DatagramPacket return_pkt = null;
 		boolean found = false;
 		CopyOnWriteArrayList<DNSResourceRecord> cname_records = new CopyOnWriteArrayList<DNSResourceRecord>();
-		CopyOnWriteArrayList<DNSResourceRecord> cname_A_records = new CopyOnWriteArrayList<DNSResourceRecord>();
 		for(DNSResourceRecord auth_entry: auths){
 			if(found == true)
 				break;
@@ -275,8 +274,17 @@ public class SimpleDNS
 		
 
 		DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
+		
 		for(DNSResourceRecord temp_record:cname_records){
 			//if(temp_record.getType() == DNS.TYPE_CNAME){
+			boolean is_dup = false;
+			for(DNSResourceRecord compared_record: result_dns.getAnswers()){
+				if(((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
+					is_dup = true;
+					break;
+				}
+			}
+			if(!is_dup)
 				result_dns.addAnswer(temp_record);
 			//}	
 		}
