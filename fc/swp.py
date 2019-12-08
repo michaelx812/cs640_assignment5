@@ -123,14 +123,15 @@ class SWPSender:
                 continue
             
             seq_num = packet.seq_num
-            (self.Timers[seq_num]).cancel()
-            for i in range(self.LAST_ACK+1,seq_num+1): 
-                logging.debug("%d",i)
-                del self.Buffer[i]
-                self.Timers[i].cancel()
-                del self.Timers[i]
-                self.sem.release()
-            self.LAST_ACK = seq_num
+            if seq_num > self.LAST_ACK:
+                (self.Timers[seq_num]).cancel()
+                for i in range(self.LAST_ACK+1,seq_num+1): 
+                    logging.debug("%d",i)
+                    del self.Buffer[i]
+                    self.Timers[i].cancel()
+                    del self.Timers[i]
+                    self.sem.release()
+                self.LAST_ACK = seq_num
         return
 
 class SWPReceiver:
