@@ -169,8 +169,18 @@ public class SimpleDNS
 			String Cname = ((DNSRdataName)c_record.getData()).getName();
 			DatagramPacket p = construct_query(packet,Cname);
 			DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
-			DNS nxt_dns = DNS.deserialize(nxt_pkt.getData(), nxt_pkt.getLength());
-			nxt_dns.addAnswer(c_record);
+			DNS nxt_dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
+			List<DNSResourceRecord> ans_s = new ArrayList<DNSResourceRecord>();
+			
+			if(contains_A_record(nxt_pkt)){
+				answers = get_answers(nxt_pkt);
+		 			 	for(DNSResourceRecord temp_record: answers){
+							 //if(temp_record.getType() == DNS.TYPE_A){
+								nxt_dns.addAnswer(temp_record);
+		 					 //}
+		 				 }
+				}
+		
 			byte[] buf = nxt_dns.serialize();
 			return new DatagramPacket(buf,buf.length);
 
