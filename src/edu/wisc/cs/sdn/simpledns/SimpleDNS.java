@@ -177,7 +177,7 @@ public class SimpleDNS
 		 			 	for(DNSResourceRecord temp_record: answers){
 							boolean is_dup = false;
 							for(DNSResourceRecord compared_record: dns.getAnswers()){
-								if(temp_record.getType == DNS.TYPE_CNAME && ((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
+								if(temp_record.getType() == DNS.TYPE_CNAME && ((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
 									is_dup = true;
 									break;
 								}
