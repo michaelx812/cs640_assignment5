@@ -173,7 +173,7 @@ public class SimpleDNS
 			List<DNSResourceRecord> ans_s = new ArrayList<DNSResourceRecord>();
 			
 			if(contains_A_record(nxt_pkt)){
-				answers = get_answers(nxt_pkt);
+				List<DNSResourceRecord> answers = get_answers(nxt_pkt);
 		 			 	for(DNSResourceRecord temp_record: answers){
 							 //if(temp_record.getType() == DNS.TYPE_A){
 								nxt_dns.addAnswer(temp_record);
