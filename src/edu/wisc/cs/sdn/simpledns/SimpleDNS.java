@@ -125,34 +125,6 @@ public class SimpleDNS
 		return receive_pkt;
 	}
 
-	// private static DatagramPacket handle_recur(DatagramPacket packet, InetAddress server_ip) throws Exception{
-	// 	DatagramPacket query_pkt = packet;
-		
-	// 	List<DNSResourceRecord> recordList = new ArrayList<DNSResourceRecord>();
-	// 	while(true){
-	// 		DatagramPacket in_pkt = recur_helper(query_pkt, server_ip, 20);
-	// 		if(in_pkt != null){
-	// 			DNS dns = DNS.deserialize(in_pkt.getData(), in_pkt.getLength());
-	// 			List<DNSResourceRecord> answers = dns.getAnswers();
-	// 			for(DNSResourceRecord record : answers){
-	// 				if(record.getType() == DNS.TYPE_A || record.getType() == DNS.TYPE_AAAA){
-	// 					for(DNSResourceRecord pastRecord : recordList){
-	// 						dns.addAnswer(pastRecord);
-	// 					}
-	// 					byte[] buf = dns.serialize();
-	// 					DatagramPacket returnPacket = new DatagramPacket(buf,buf.length);
-	// 					return returnPacket;
-	// 				}else if(record.getType() == DNS.TYPE_CNAME){
-	// 					recordList.add(record);
-	// 				}
-	// 			}
-
-	// 		}else{
-	// 			return null;
-	// 		}
-	// 	}
-
-	// }
 
 	private static DatagramPacket recur_helper(DatagramPacket packet,InetAddress server_ip) throws Exception{
 
@@ -225,15 +197,6 @@ public class SimpleDNS
 							found = true;
 							System.out.println("find confirm");
 						}
-							
-						//List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-						//if(!answers.isEmpty() && !found){
-						// 	for(DNSResourceRecord temp_record: answers){
-						// 		if(temp_record.getType() == DNS.TYPE_CNAME){
-						//			add_cname_entry(cname_records,temp_record);
-						// 		}
-						// 	}
-						//}
 						return_pkt = nxt_pkt;
 				}
 			}
@@ -249,79 +212,17 @@ public class SimpleDNS
 			 					found = true;
 			 					System.out.println("find confirm");
 			 				}
-								
-			 				//List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-			 				//if(!answers.isEmpty()){
-			 				//	for(DNSResourceRecord return_recs: answers){
-			 				//		if(return_recs.getType() == DNS.TYPE_CNAME){
-							//			add_cname_entry(cname_records,temp_record);
-			 				//		}
-			 				//	}
-			 				//}
 			 			return_pkt = nxt_pkt;
 			 			}
 			 		}
 			 	}
 			 }
 		}
-
-		//boolean add_cname_a_record = false;
-		//List<DNSResourceRecord> ARecords = new ArrayList<DNSResourceRecord>();
-		// if(!found && !cname_records.isEmpty()){
-			
-		// 	for(DNSResourceRecord temp_r: cname_records){
-		// 		String Cname = ((DNSRdataName)temp_r.getData()).getName();
-		// 		System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
-		// 		DatagramPacket p = construct_query(packet,Cname);
-		// 		DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
-		// 		System.out.println("stucked????");					
-		// 		if(contains_A_record(nxt_pkt)){
-
-		// 			add_cname_a_record = true;
-		// 			System.out.println("find confirm");
-		// 			List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-		// 			if(!answers.isEmpty()){
-		// 			 	for(DNSResourceRecord temp_record: answers){
-		// 					 if(temp_record.getType() == DNS.TYPE_A){
-		// 						ARecords.add(temp_record);
-		// 					 }
-		// 				 }
-		// 			}
-		// 			break;
-
-		// 		}
-					
-				
-				
-		// 	}			
-		// }
-
-
 		if(return_pkt == null)
 			return in_pkt;
 		
 
 		DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
-		
-		// for(DNSResourceRecord temp_record:cname_records){
-		// 	//if(temp_record.getType() == DNS.TYPE_CNAME){
-		// 	boolean is_dup = false;
-		// 	for(DNSResourceRecord compared_record: result_dns.getAnswers()){
-		// 		if(((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
-		// 			is_dup = true;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if(!is_dup)
-		// 		result_dns.addAnswer(temp_record);
-		// 	//}	
-		// }
-		// if(add_cname_a_record){
-		// 	for(DNSResourceRecord temp_record:ARecords){
-		// 			result_dns.addAnswer(temp_record);
-		// 	}
-		// }
-		//System.out.println(result_dns.toString());
 		byte[] buf = result_dns.serialize();
 		return_pkt = new DatagramPacket(buf,buf.length);
 		
@@ -329,22 +230,21 @@ public class SimpleDNS
 		return return_pkt;
 	}
 
-	private static void add_cname_entry(List<DNSResourceRecord> list, DNSResourceRecord record){
-		System.out.println("adding cname entry+++++++++++++++++++++++++++");
+	// private static void add_cname_entry(List<DNSResourceRecord> list, DNSResourceRecord record){
+	// 	System.out.println("adding cname entry+++++++++++++++++++++++++++");
 
-		boolean dup = false;
-		for(DNSResourceRecord temp: list){
-			System.out.println("processing temp:"+temp.toString());
-			if(((DNSRdataName)temp.getData()).getName().equals(((DNSRdataName)record.getData()).getName())){
-				System.out.println("===================dup with:"+record.toString());
-				return;
-			}
-		}
-		if(!dup){
-			list.add(record);
-		}
-		return;
-	}
+	// 	boolean dup = false;
+	// 	for(DNSResourceRecord temp: list){
+	// 		System.out.println("processing temp:"+temp.toString());
+	// 		if(((DNSRdataName)temp.getData()).getName().equals(((DNSRdataName)record.getData()).getName())){
+	// 			return;
+	// 		}
+	// 	}
+	// 	if(!dup){
+	// 		list.add(record);
+	// 	}
+	// 	return;
+	// }
 
 	private static List<DNSResourceRecord> get_answers(DatagramPacket pkt){
 		DNS dns = DNS.deserialize(pkt.getData(), pkt.getLength());
@@ -381,8 +281,6 @@ public class SimpleDNS
 	private static DatagramPacket construct_query(DatagramPacket prev,String name){
 		byte[] new_buff =  Arrays.copyOf(prev.getData(), prev.getLength());
 		DNS prev_dns = DNS.deserialize(new_buff, new_buff.length);
-		
-		//DNSQuestion question = new DNSQuestion(name, DNS.TYPE_A);
 		List<DNSQuestion> questions = prev_dns.getQuestions();
 		DNSQuestion question = questions.get(0);
 		question.setName(name);
@@ -434,10 +332,7 @@ public class SimpleDNS
 					String entry_Ip_str = entry.ip;
 					long entry_Ip_Int = string_to_ip(entry_Ip_str);
 					long mask = 0x00000000ffffffff << (32-entry.mask);
-					System.out.println("mask ="+mask +"    num="+entry_Ip_Int+"    str="+entry_Ip_str);
-					System.out.println("non comparing "+record_ip_Str+"   to   "+(entry_Ip_Int&mask));
 					if((record_ip_Int & mask) == (entry_Ip_Int&mask)){
-						System.out.println("FInd + "+entry_Ip_str);
 						DNSRdata data = new DNSRdataString(entry.location + "-" + record_ip_Str);
 						DNSResourceRecord newRecord = new DNSResourceRecord(record.getName(), (short)16,data);
 						txts.add(newRecord);
@@ -452,26 +347,13 @@ public class SimpleDNS
 		packet = new DatagramPacket(buf, buf.length);
 		return packet;
 	}
-	public static long string_to_ip(String ipAddress) {
-		
-		long result = 0;
-			
-		String[] ipAddressInArray = ipAddress.split("\\.");
-	
-		for (int i = 3; i >= 0; i--) {
-				
+	public static long string_to_ip(String ipAddress) {		
+		long result = 0;			
+		String[] ipAddressInArray = ipAddress.split("\\.");	
+		for (int i = 3; i >= 0; i--) {				
 			long ip = Long.parseLong(ipAddressInArray[3 - i]);
-				
-			//left shifting 24,16,8,0 and bitwise OR
-				
-			//1. 192 << 24
-			//1. 168 << 16
-			//1. 1   << 8
-			//1. 2   << 0
-			result |= ip << (i * 8);
-			
-		}
-	
+			result |= ip << (i * 8);			
+		}	
 		return result;
 	  }
 }
