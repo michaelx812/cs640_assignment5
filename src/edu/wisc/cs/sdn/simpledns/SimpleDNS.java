@@ -337,11 +337,17 @@ public class SimpleDNS
 	}
 
 	private static List<DNSResourceRecord> get_CNAME_records(DatagramPacket pkt){
-		return null;
+		List<DNSResourceRecord> answers = get_answers(pkt);
+		List<DNSResourceRecord> c_records = new ArrayList<DNSResourceRecord>();
+		for(DNSResourceRecord rec: answers){
+			if(rec.getType()==DNS.TYPE_CNAME)
+				c_records.add(rec);
+		}
+		return c_records;
 	}
 
 	private static boolean contians_CNAME_record(DatagramPacket pkt){
-		return false;
+		return get_CNAME_records(pkt).size()>0;
 	}
 
 	private static boolean contains_A_record(DatagramPacket pkt) {
