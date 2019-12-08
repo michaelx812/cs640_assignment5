@@ -175,9 +175,15 @@ public class SimpleDNS
 			if(contains_A_record(nxt_pkt)){
 				List<DNSResourceRecord> answers = get_answers(nxt_pkt);
 		 			 	for(DNSResourceRecord temp_record: answers){
-							 //if(temp_record.getType() == DNS.TYPE_A){
-								nxt_dns.addAnswer(temp_record);
-		 					 //}
+							boolean is_dup = false;
+							for(DNSResourceRecord compared_record: dns.getAnswers()){
+								if(temp_record.getType == DNS.TYPE_CNAME && ((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
+									is_dup = true;
+									break;
+								}
+							}
+							if(!is_dup)
+							nxt_dns.addAnswer(temp_record);
 		 				 }
 				}
 		
@@ -259,8 +265,8 @@ public class SimpleDNS
 			 }
 		}
 
-		boolean add_cname_a_record = false;
-		List<DNSResourceRecord> ARecords = new ArrayList<DNSResourceRecord>();
+		//boolean add_cname_a_record = false;
+		//List<DNSResourceRecord> ARecords = new ArrayList<DNSResourceRecord>();
 		// if(!found && !cname_records.isEmpty()){
 			
 		// 	for(DNSResourceRecord temp_r: cname_records){
@@ -297,24 +303,24 @@ public class SimpleDNS
 
 		DNS result_dns = DNS.deserialize(return_pkt.getData(), return_pkt.getLength());
 		
-		for(DNSResourceRecord temp_record:cname_records){
-			//if(temp_record.getType() == DNS.TYPE_CNAME){
-			boolean is_dup = false;
-			for(DNSResourceRecord compared_record: result_dns.getAnswers()){
-				if(((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
-					is_dup = true;
-					break;
-				}
-			}
-			if(!is_dup)
-				result_dns.addAnswer(temp_record);
-			//}	
-		}
-		if(add_cname_a_record){
-			for(DNSResourceRecord temp_record:ARecords){
-					result_dns.addAnswer(temp_record);
-			}
-		}
+		// for(DNSResourceRecord temp_record:cname_records){
+		// 	//if(temp_record.getType() == DNS.TYPE_CNAME){
+		// 	boolean is_dup = false;
+		// 	for(DNSResourceRecord compared_record: result_dns.getAnswers()){
+		// 		if(((DNSRdataName)temp_record.getData()).getName().equals(((DNSRdataName)compared_record.getData()).getName())){
+		// 			is_dup = true;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if(!is_dup)
+		// 		result_dns.addAnswer(temp_record);
+		// 	//}	
+		// }
+		// if(add_cname_a_record){
+		// 	for(DNSResourceRecord temp_record:ARecords){
+		// 			result_dns.addAnswer(temp_record);
+		// 	}
+		// }
 		//System.out.println(result_dns.toString());
 		byte[] buf = result_dns.serialize();
 		return_pkt = new DatagramPacket(buf,buf.length);
