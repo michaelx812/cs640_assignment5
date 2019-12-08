@@ -5,3 +5,5 @@ target: src/
 run:
 	cd src;java edu.wisc.cs.sdn.simpledns.SimpleDNS -r a.root-servers.net  -e ../ec2.csv 
 
+clean:
+	find . -type f -name "*.class" -exec rm -rf {} \;
