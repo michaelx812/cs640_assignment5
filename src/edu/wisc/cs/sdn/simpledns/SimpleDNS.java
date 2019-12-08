@@ -163,6 +163,18 @@ public class SimpleDNS
 			System.out.println("Get A!!!!!!!!!!!!!!!!!!!!!!!!!");
 			return in_pkt;
 		}
+		if(contians_CNAME_record(in_pkt)){
+			List<DNSResourceRecord> c_records = get_CNAME_records(in_pkt);
+			DNSResourceRecord c_record = c_records.get(0);
+			String Cname = ((DNSRdataName)c_record.getData()).getName();
+			DatagramPacket p = construct_query(packet,Cname);
+			DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
+			DNS nxt_dns = DNS.deserialize(nxt_pkt.getData(), nxt_pkt.getLength());
+			nxt_dns.addAnswer(c_record);
+			byte[] buf = nxt_dns.serialize();
+			return new DatagramPacket(buf,buf.length);
+
+		}
 		List<DNSResourceRecord> auths = dns.getAuthorities();
 		List<DNSResourceRecord> additions = dns.getAdditional();
 		if(auths.size()==0){
@@ -239,34 +251,34 @@ public class SimpleDNS
 
 		boolean add_cname_a_record = false;
 		List<DNSResourceRecord> ARecords = new ArrayList<DNSResourceRecord>();
-		if(!found && !cname_records.isEmpty()){
+		// if(!found && !cname_records.isEmpty()){
 			
-			for(DNSResourceRecord temp_r: cname_records){
-				String Cname = ((DNSRdataName)temp_r.getData()).getName();
-				System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
-				DatagramPacket p = construct_query(packet,Cname);
-				DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
-				System.out.println("stucked????");					
-				if(contains_A_record(nxt_pkt)){
+		// 	for(DNSResourceRecord temp_r: cname_records){
+		// 		String Cname = ((DNSRdataName)temp_r.getData()).getName();
+		// 		System.out.println("Searching for new Cname:"+Cname+"+++++++++++++=");
+		// 		DatagramPacket p = construct_query(packet,Cname);
+		// 		DatagramPacket nxt_pkt = recur_helper(p, root_server_ip);
+		// 		System.out.println("stucked????");					
+		// 		if(contains_A_record(nxt_pkt)){
 
-					add_cname_a_record = true;
-					System.out.println("find confirm");
-					List<DNSResourceRecord> answers = get_answers(nxt_pkt);
-					if(!answers.isEmpty()){
-					 	for(DNSResourceRecord temp_record: answers){
-							 if(temp_record.getType() == DNS.TYPE_A){
-								ARecords.add(temp_record);
-							 }
-						 }
-					}
-					break;
+		// 			add_cname_a_record = true;
+		// 			System.out.println("find confirm");
+		// 			List<DNSResourceRecord> answers = get_answers(nxt_pkt);
+		// 			if(!answers.isEmpty()){
+		// 			 	for(DNSResourceRecord temp_record: answers){
+		// 					 if(temp_record.getType() == DNS.TYPE_A){
+		// 						ARecords.add(temp_record);
+		// 					 }
+		// 				 }
+		// 			}
+		// 			break;
 
-				}
+		// 		}
 					
 				
 				
-			}			
-		}
+		// 	}			
+		// }
 
 
 		if(return_pkt == null)
@@ -324,7 +336,13 @@ public class SimpleDNS
 		return answers;
 	}
 
-	
+	private static List<DNSResourceRecord> get_CNAME_records(DatagramPacket pkt){
+		return null;
+	}
+
+	private static boolean contians_CNAME_record(DatagramPacket pkt){
+		return false;
+	}
 
 	private static boolean contains_A_record(DatagramPacket pkt) {
 		List<DNSResourceRecord> answers = get_answers(pkt);
