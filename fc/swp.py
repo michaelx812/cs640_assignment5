@@ -126,7 +126,6 @@ class SWPSender:
             if seq_num > self.LAST_ACK:
                 (self.Timers[seq_num]).cancel()
                 for i in range(self.LAST_ACK+1,seq_num+1): 
-                    logging.debug("%d",i)
                     del self.Buffer[i]
                     self.Timers[i].cancel()
                     del self.Timers[i]
