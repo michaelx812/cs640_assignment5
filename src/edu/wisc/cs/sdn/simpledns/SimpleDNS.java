@@ -270,7 +270,7 @@ public class SimpleDNS
 		List<DNSResourceRecord> answers = get_answers(pkt);
 		if(answers.size()>0){
 			for(DNSResourceRecord ans: answers){
-				if(ans.getType()==DNS.TYPE_A){
+				if(ans.getType()==DNS.TYPE_A || ans.getType()==DNS.TYPE_AAAA){
 					return true;
 				}
 			}	
